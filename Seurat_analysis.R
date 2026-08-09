@@ -1,108 +1,446 @@
-# seurat_analysis.R
-# Supervised Training Script: Spatial Transcriptomics Pipeline using MERFISH Datasets
-# Context: Biosetup LifeSciences Remote Internship Exercise
-# Target Toolsets: Seurat Ecosystem (v5) & Spatial Coordinate Mapping
+# Spatial Transcriptomics Analysis using MERFISH Data
+#
+# This script documents a supervised spatial transcriptomics workflow
+# developed during a computational biology internship.
+#
+# The workflow is reproduced using a publicly available MERFISH dataset
+# for portfolio and reproducibility purposes.
+#
+# Target Toolsets:
+#   - R
+#   - Seurat v5
+#   - ggplot2
+#   - patchwork
+#   - Vizgen/MERSCOPE spatial data
+#
+# -------------------------------------------------------------------------
+# 1. Load Required Libraries
+# -------------------------------------------------------------------------
 
-# -------------------------------------------------------------------------
-# 1. Load Essential Computational Libraries
-# -------------------------------------------------------------------------
 library(Seurat)
 library(ggplot2)
 library(patchwork)
 
-print("=========================================================================")
-print("--- Step 1: Spatial Data Ingestion & Geometric Coordinate Mapping ---")
-print("=========================================================================")
+cat("\n")
+cat("=========================================================================\n")
+cat("--- MERFISH Spatial Transcriptomics Analysis Pipeline -------------------\n")
+cat("=========================================================================\n\n")
 
-# Path configurations for a standard sandbox environment
-# In a local pipeline, this directory contains 'cell_by_gene.csv' and 'cell_metadata.csv'
+# -------------------------------------------------------------------------
+# 2. Define Input and Output Paths
+# -------------------------------------------------------------------------
+
+# Directory containing the publicly available MERFISH dataset.
+#
+# Expected location:
+# data/merfish_mouse_brain/
+#
+# The directory should contain the files required by LoadVizgen().
+
 data_directory <- "data/merfish_mouse_brain/"
 
-if (dir.exists(data_directory)) {
-    # Load Vizgen MERSCOPE spatial data formats programmatically
-    merfish_data <- LoadVizgen(data.dir = data_directory)
-    print("Success: Spatial MERFISH datasets successfully loaded into Seurat framework.")
-} else {
-    # Fallback/Mock placeholder system to ensure script architecture compiles cleanly
-    print("Notice: Input directory paths not detected locally.")
-    print("Proceeding with pipeline compilation and variable structure validation...")
-    
-    # Generate mock empty data coordinates to validate parameters without crashing
-    pbmc.data <- matrix(0, nrow = 500, ncol = 1000)
-    rownames(pbmc.data) <- paste0("Gene-", 1:500)
-    colnames(pbmc.data) <- paste0("Cell-", 1:1000)
-    merfish_data <- CreateSeuratObject(counts = pbmc.data, project = "MERFISH_Sandbox")
+# Create directories for reproducible outputs.
+dir.create("figures", showWarnings = FALSE, recursive = TRUE)
+dir.create("results", showWarnings = FALSE, recursive = TRUE)
+
+# -------------------------------------------------------------------------
+# 3. Load MERFISH Spatial Transcriptomics Data
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 1: Spatial Data Ingestion --------------------------------------\n")
+cat("=========================================================================\n")
+
+if (!dir.exists(data_directory)) {
+
+  stop(
+    paste0(
+      "\nMERFISH dataset not found.\n\n",
+      "Expected dataset directory:\n",
+      data_directory,
+      "\n\n",
+      "Please place the publicly available MERFISH dataset in this location ",
+      "before running the analysis."
+    )
+  )
+
 }
 
-print("=========================================================================")
-print("--- Step 2: Quality Control (QC) & Micro-Environment Filtering ---")
-print("=========================================================================")
+cat("Loading MERFISH spatial transcriptomics data...\n")
 
-# Visualize baseline cell density distribution before filtering
-# Track feature distributions across the spatial dataset matrix
-print("Auditing feature library count distribution per cell boundary...")
+merfish_data <- LoadVizgen(
+  data.dir = data_directory
+)
 
-# Apply the beginner-friendly filtering constraints detailed in the methodology:
-# Filter out empty pixel fragments (<100 genes) or dense multi-cell overlapping clumps (>1500 genes)
-merfish_data <- subset(merfish_data, subset = nFeature_RNA > 100 & nFeature_RNA < 1500)
-print(paste("QC Filtering complete. Remaining cells inside structure:", ncol(merfish_data)))
+cat(
+  "Successfully loaded MERFISH dataset with ",
+  ncol(merfish_data),
+  " cells and ",
+  nrow(merfish_data),
+  " features.\n\n"
+)
 
-print("=========================================================================")
-print("--- Step 3: Expression Normalization & Dimensional Compression ---")
-print("=========================================================================")
+# -------------------------------------------------------------------------
+# 4. Quality Control
+# -------------------------------------------------------------------------
 
-# Apply global scale factor standard log-transform normalizations (LogNormalize)
-# This removes technical biases resulting from variance in laser imaging depth
-merfish_data <- NormalizeData(merfish_data, normalization.method = "LogNormalize", scale.factor = 10000)
+cat("=========================================================================\n")
+cat("--- Step 2: Quality Control ---------------------------------------------\n")
+cat("=========================================================================\n")
 
-# Identify the top 500 features exhibiting high spatial variation across tissue coordinates
-merfish_data <- FindVariableFeatures(merfish_data, selection.method = "vst", nfeatures = 500)
+cat("Generating baseline quality-control metrics...\n")
 
-# Center and scale variable metrics before dimensional grouping loops
+# Visualize the number of detected features per cell.
+qc_plot <- VlnPlot(
+  merfish_data,
+  features = "nFeature_RNA",
+  pt.size = 0
+) +
+  ggtitle("MERFISH Quality Control: Detected Features per Cell") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(
+  filename = "figures/qc_nFeature_RNA.png",
+  plot = qc_plot,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+
+# Apply the filtering thresholds used in the original workflow.
+# Cells with fewer than 100 detected features or more than 1500 detected
+# features are excluded from downstream analysis.
+
+merfish_data <- subset(
+  merfish_data,
+  subset = nFeature_RNA > 100 & nFeature_RNA < 1500
+)
+
+cat(
+  "QC filtering complete.\n",
+  "Cells retained: ",
+  ncol(merfish_data),
+  "\n\n",
+  sep = ""
+)
+
+# -------------------------------------------------------------------------
+# 5. Normalization
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 3: Expression Normalization ------------------------------------\n")
+cat("=========================================================================\n")
+
+cat("Applying LogNormalize...\n")
+
+merfish_data <- NormalizeData(
+  merfish_data,
+  normalization.method = "LogNormalize",
+  scale.factor = 10000
+)
+
+# -------------------------------------------------------------------------
+# 6. Identify Highly Variable Features
+# -------------------------------------------------------------------------
+
+cat("Identifying highly variable genes...\n")
+
+merfish_data <- FindVariableFeatures(
+  merfish_data,
+  selection.method = "vst",
+  nfeatures = 500
+)
+
+cat(
+  "Number of highly variable features identified: ",
+  length(VariableFeatures(merfish_data)),
+  "\n\n",
+  sep = ""
+)
+
+# -------------------------------------------------------------------------
+# 7. Scale Data
+# -------------------------------------------------------------------------
+
+cat("Scaling expression data...\n")
+
 all_genes <- rownames(merfish_data)
-merfish_data <- ScaleData(merfish_data, features = all_genes)
 
-# Compute Principal Component Analysis (PCA) models across 30 orthogonal eigenvectors
-merfish_data <- RunPCA(merfish_data, npcs = 30, verbose = FALSE)
+merfish_data <- ScaleData(
+  merfish_data,
+  features = all_genes
+)
 
-print("=========================================================================")
-print("--- Step 4: Graph-Based Spatial Clustering & Visualization ---")
-print("=========================================================================")
+# -------------------------------------------------------------------------
+# 8. Principal Component Analysis
+# -------------------------------------------------------------------------
 
-# Construct a K-Nearest Neighbor (KNN) graph structure in PCA feature space
-merfish_data <- FindNeighbors(merfish_data, dims = 1:10)
+cat("=========================================================================\n")
+cat("--- Step 4: Principal Component Analysis -------------------------------\n")
+cat("=========================================================================\n")
 
-# Implement the Louvain algorithm partitioning system at a conservative resolution of 0.3
-merfish_data <- FindClusters(merfish_data, resolution = 0.3, verbose = FALSE)
+cat("Running PCA...\n")
 
-# Generate non-linear dimensional reduction profiles (PCA coordinates mapping display)
-pca_plot <- DimPlot(merfish_data, reduction = "pca", label = TRUE) + 
-            ggtitle("Abstract PCA Feature Space Clusters")
+merfish_data <- RunPCA(
+  merfish_data,
+  features = VariableFeatures(merfish_data),
+  npcs = 30,
+  verbose = FALSE
+)
 
-# Check if spatial imagery maps exist inside the environment
+pca_plot <- DimPlot(
+  merfish_data,
+  reduction = "pca",
+  label = TRUE
+) +
+  ggtitle("PCA of MERFISH Expression Profiles") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(
+  filename = "figures/pca_clusters.png",
+  plot = pca_plot,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+
+# -------------------------------------------------------------------------
+# 9. Construct Nearest-Neighbour Graph
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 5: Graph-Based Clustering --------------------------------------\n")
+cat("=========================================================================\n")
+
+cat("Constructing nearest-neighbour graph...\n")
+
+merfish_data <- FindNeighbors(
+  merfish_data,
+  dims = 1:10
+)
+
+# -------------------------------------------------------------------------
+# 10. Identify Cell Clusters
+# -------------------------------------------------------------------------
+
+cat("Identifying transcriptionally similar cell populations...\n")
+
+merfish_data <- FindClusters(
+  merfish_data,
+  resolution = 0.3,
+  verbose = FALSE
+)
+
+cat(
+  "Number of identified clusters: ",
+  length(unique(Idents(merfish_data))),
+  "\n\n",
+  sep = ""
+)
+
+# -------------------------------------------------------------------------
+# 11. UMAP Dimensional Reduction
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 6: UMAP Visualization ------------------------------------------\n")
+cat("=========================================================================\n")
+
+cat("Running UMAP...\n")
+
+merfish_data <- RunUMAP(
+  merfish_data,
+  dims = 1:10
+)
+
+umap_plot <- DimPlot(
+  merfish_data,
+  reduction = "umap",
+  label = TRUE
+) +
+  ggtitle("UMAP of MERFISH Cell Clusters") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggsave(
+  filename = "figures/umap_clusters.png",
+  plot = umap_plot,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+
+# -------------------------------------------------------------------------
+# 12. Spatial Visualization
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 7: Spatial Cluster Visualization -------------------------------\n")
+cat("=========================================================================\n")
+
+# LoadVizgen() stores spatial information when the supplied dataset contains
+# the required spatial coordinate information.
+
 if ("Vizgen" %in% names(merfish_data@images)) {
-    # Render the computed Louvain cell clusters back onto their real tissue coordinate map pixels!
-    spatial_plot <- SpatialDimPlot(merfish_data, stroke = NA) + 
-                    ggtitle("Physical Tissue Spatial Coordinates Map")
-    print(pca_plot + spatial_plot)
+
+  cat("Generating spatial cluster map...\n")
+
+  spatial_plot <- SpatialDimPlot(
+    merfish_data,
+    stroke = NA
+  ) +
+    ggtitle("Spatial Distribution of MERFISH Cell Clusters") +
+    theme(plot.title = element_text(hjust = 0.5))
+
+  ggsave(
+    filename = "figures/spatial_clusters.png",
+    plot = spatial_plot,
+    width = 8,
+    height = 6,
+    dpi = 300
+  )
+
 } else {
-    print(pca_plot)
-    print("Notice: Spatial coordinate plotting bypassed due to fallback template status.")
+
+  cat(
+    "Spatial image information was not detected in the loaded object.\n",
+    "Spatial visualization was therefore skipped.\n"
+  )
+
 }
 
-print("=========================================================================")
-print("--- Step 5: Metadata Structural Integrity Audit ---")
-print("=========================================================================")
+# -------------------------------------------------------------------------
+# 13. Identify Marker Genes
+# -------------------------------------------------------------------------
 
-# This validation loop prints out raw spatial coordinates to prove the script handles spatial arrays
+cat("=========================================================================\n")
+cat("--- Step 8: Marker Gene Identification ----------------------------------\n")
+cat("=========================================================================\n")
+
+cat("Identifying cluster marker genes...\n")
+
+markers <- FindAllMarkers(
+  merfish_data,
+  only.pos = TRUE,
+  min.pct = 0.25,
+  logfc.threshold = 0.25
+)
+
+# Save the complete marker-gene table.
+write.csv(
+  markers,
+  file = "results/marker_genes.csv",
+  row.names = FALSE
+)
+
+cat(
+  "Marker-gene analysis complete.\n",
+  "Results saved to results/marker_genes.csv\n\n"
+)
+
+# -------------------------------------------------------------------------
+# 14. Cluster Summary
+# -------------------------------------------------------------------------
+
+cat("Generating cluster summary...\n")
+
+cluster_counts <- as.data.frame(
+  table(Idents(merfish_data))
+)
+
+colnames(cluster_counts) <- c(
+  "Cluster",
+  "Cell_Count"
+)
+
+write.csv(
+  cluster_counts,
+  file = "results/cluster_summary.csv",
+  row.names = FALSE
+)
+
+# -------------------------------------------------------------------------
+# 15. Spatial Coordinate Audit
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Step 9: Spatial Coordinate Audit ------------------------------------\n")
+cat("=========================================================================\n")
+
 if ("Vizgen" %in% names(merfish_data@images)) {
-    print("Extracting physical coordinate anchor frames for cell identification validation:")
-    print(head(GetTissueCoordinates(merfish_data, image = "Vizgen")))
+
+  cat("Extracting spatial coordinate information...\n")
+
+  spatial_coordinates <- GetTissueCoordinates(
+    merfish_data,
+    image = "Vizgen"
+  )
+
+  write.csv(
+    spatial_coordinates,
+    file = "results/spatial_coordinates.csv",
+    row.names = FALSE
+  )
+
+  cat(
+    "Spatial coordinates saved to results/spatial_coordinates.csv\n\n"
+  )
+
 } else {
-    print("Structure Validation: Verification audit script compiled with 0 syntax warnings.")
-    print("Ready for automated high-throughput cluster mapping runs on academic servers.")
+
+  cat(
+    "Spatial coordinate information was not available in the loaded object.\n\n"
+  )
+
 }
 
-print("=========================================================================")
-print("Execution Complete: Spatial Transcriptomics Pipeline Finalized.")
-print("=========================================================================")
+# -------------------------------------------------------------------------
+# 16. Save Processed Seurat Object
+# -------------------------------------------------------------------------
+
+cat("Saving processed Seurat object...\n")
+
+saveRDS(
+  merfish_data,
+  file = "results/merfish_processed.rds"
+)
+
+
+# -------------------------------------------------------------------------
+# 17. Reproducibility Information
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Reproducibility Information -----------------------------------------\n")
+cat("=========================================================================\n")
+
+# Save R and package information used for this analysis.
+capture.output(
+  sessionInfo(),
+  file = "results/sessionInfo.txt"
+)
+
+cat(
+  "Session information saved to results/sessionInfo.txt\n\n"
+)
+
+# -------------------------------------------------------------------------
+# 18. Analysis Complete
+# -------------------------------------------------------------------------
+
+cat("=========================================================================\n")
+cat("--- Analysis Complete ---------------------------------------------------\n")
+cat("=========================================================================\n")
+
+cat("\nGenerated outputs:\n")
+cat("  figures/qc_nFeature_RNA.png\n")
+cat("  figures/pca_clusters.png\n")
+cat("  figures/umap_clusters.png\n")
+cat("  figures/spatial_clusters.png (if spatial information is available)\n")
+cat("  results/marker_genes.csv\n")
+cat("  results/cluster_summary.csv\n")
+cat("  results/spatial_coordinates.csv (if available)\n")
+cat("  results/merfish_processed.rds\n")
+cat("  results/sessionInfo.txt\n\n")
+
+cat("MERFISH spatial transcriptomics analysis completed successfully.\n")

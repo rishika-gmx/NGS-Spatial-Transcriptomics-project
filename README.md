@@ -1,15 +1,30 @@
-# Spatial Transcriptomics Sandbox: Supervised MERFISH Analysis Portfolio
+# NGS & Spatial Transcriptomics Analysis using Seurat
 
-**Academic Training Tracks:** Computational Genomics & Spatial Systems Biology  
-**Training Framework:** Remote Research Internship | Biosetup LifeSciences  
-**Scope:** Educational Proof-of-Concept  
+**Undergraduate Bioinformatics Internship Project**
 
+Educational Proof-of-Concept | R • Seurat • Linux • MERFISH
 ---
 
 ## 📌 Project Overview
-This repository documents an introductory, supervised exploration into spatial transcriptomics using the **Seurat (v5)** ecosystem in R. Unlike standard single-cell RNA-sequencing (scRNA-seq) which dissociates tissues and loses spatial context, **MERFISH** (Multiplexed Error-Robust Fluorescence In Situ Hybridization) combines single-molecule imaging with binary barcoding to capture gene expression patterns *in situ*. 
+This repository documents an introductory bioinformatics project completed during a computational biology internship, focusing on the analysis of publicly available MERFISH spatial transcriptomics datasets using R and the Seurat package.
 
-This sandbox pipeline processes public image-based MERFISH datasets (Vizgen MERSCOPE benchmark tissue slices) to learn the foundational dry-lab mechanics of mapping cellular identity directly within its physical tissue geography.
+The project introduces a standard single-cell and spatial transcriptomics workflow, including quality control, normalization, dimensionality reduction, clustering, marker identification, and spatial visualization. It was completed as a supervised learning project to develop practical experience with transcriptomic data analysis and reproducible computational workflows.
+
+---
+
+## 🎯 Project Scope
+This project demonstrates:
+
+- Linux-based bioinformatics workflow
+- R programming
+- Seurat analysis
+- Quality control
+- PCA
+- Clustering
+- Marker gene identification
+- Spatial transcriptomics visualization
+
+This repository represents an educational implementation completed under supervision during a computational biology internship.
 
 ---
 
@@ -43,6 +58,36 @@ To handle background imaging noise, optical artifacts, or segmented empty bounda
 1. **Network Assembly:** Constructed a shared K-Nearest Neighbor (KNN) network graph based on Euclidean distances in PCA space.
 2. **Community Partitioning:** Implemented the Louvain clustering algorithm at a conservative resolution of 0.3 to cleanly group transcriptionally similar cells into distinct cellular phenotypes.
 
+
+## 🔬 Analysis Workflow
+```
+Public MERFISH Dataset
+            │
+            ▼
+      Data Import
+            │
+            ▼
+     Quality Control
+            │
+            ▼
+      Normalization
+            │
+            ▼
+Dimensional Reduction (PCA)
+            │
+            ▼
+    Nearest Neighbours
+            │
+            ▼
+        Clustering
+            │
+            ▼
+ Marker Gene Detection
+            │
+            ▼
+ Spatial Visualization
+```
+
 ---
 
 ## 📊 Core Benchmarked Comparisons: Spatial vs. Dissociated Omics
@@ -70,11 +115,45 @@ Cells residing within a <20 μ m radius are isolated to calculate localized micr
 
 ---
 
+## ✔ Implementation Status
+
+```
+Spatial Transcriptomics Workflow
+│
+├── Data import                          ✅ Completed
+├── Quality control                      ✅ Completed
+├── Normalization                        ✅ Completed
+├── PCA                                  ✅ Completed
+├── Nearest neighbor graph               ✅ Completed
+├── Clustering                           ✅ Completed
+├── Marker gene analysis                 ✅ Completed
+├── Spatial visualization                ✅ Completed
+└── Workflow documentation               ✅ Completed
+```
+
+## 📊 Expected Outputs
+
+The analysis workflow generates:
+
+- Quality control metrics
+- PCA visualization
+- Cluster assignments
+- UMAP projection
+- Marker gene tables
+- Spatial feature plots
+---
+
 ## 📁 Repository Structure
-```text
-├── data/                      # Directory for cell_by_gene.csv and cell_metadata.csv
-├── seurat_analysis.R          # Supervised R configuration script for spatial MERFISH mapping
-└── README.md                  # Comprehensive portfolio documentation
+
+```
+NGS-Spatial-Transcriptomics-project
+├── README.md
+├── scripts/
+│   └── Seurat_analysis.R
+├── docs/
+├── figures/
+├── results/
+├── LICENSE
 ```
 
 ## 📜 Acknowledgements & References
