@@ -1,20 +1,16 @@
 
-````markdown
 # NGS & Spatial Transcriptomics Analysis using Seurat
 
 **Undergraduate Bioinformatics Internship Project**
 
 Reproducible Portfolio Analysis | R • Seurat • Linux • MERFISH
 
----
 
 ## 📌 Project Overview
 
 This repository documents a supervised introductory bioinformatics project completed during a computational biology internship. The project focuses on the analysis of a publicly available MERFISH spatial transcriptomics dataset from mouse brain tissue using **R and Seurat**.
 
 The workflow was designed to provide practical experience with transcriptomic data processing, quality control, dimensionality reduction, graph-based clustering, marker-gene identification, spatial coordinate analysis, and biological interpretation of transcriptionally distinct cell populations.
-
-The project was completed as a supervised learning exercise and is intended to demonstrate practical familiarity with a reproducible computational biology workflow rather than independent research.
 
 ---
 
@@ -90,7 +86,7 @@ Public MERFISH Mouse Brain Dataset
        Normalization
               │
               ▼
- Highly Variable Features
+   Highly Variable Features
               │
               ▼
              PCA
@@ -117,8 +113,8 @@ Public MERFISH Mouse Brain Dataset
  Cluster-Level Interpretation
               │
               ▼
- Manual / Provisional
- Cell-Type Annotation
+     Manual / Provisional
+     Cell-Type Annotation
 ````
 
 ---
@@ -580,5 +576,4 @@ The analysis was performed in a Linux/WSL environment using R and Seurat.
 * **Spatial Transcriptomics Technology:** Vizgen MERFISH / MERSCOPE.
 * **Dataset:** Publicly available MERFISH mouse brain dataset.
 
-This project was completed as a supervised computational biology learning exercise and is presented for educational, portfolio, and reproducibility purposes.
 
