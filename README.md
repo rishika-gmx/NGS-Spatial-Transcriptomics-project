@@ -558,13 +558,6 @@ Seurat_analysis.R
 ```
 
 The processed Seurat objects and intermediate result tables are provided in the `results/` directory.
-
-R session and package information are recorded in:
-
-```text
-results/sessionInfo.txt
-```
-
 The analysis was performed in a Linux/WSL environment using R and Seurat.
 
 ---
