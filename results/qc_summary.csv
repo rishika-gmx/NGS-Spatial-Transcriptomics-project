@@ -1,0 +1,7 @@
+"metric","value"
+"cells_before_QC",83546
+"cells_after_QC",83407
+"cells_removed",139
+"genes",483
+"minimum_features",20
+"maximum_features",166
