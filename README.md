@@ -3,7 +3,7 @@
 
 **Undergraduate Bioinformatics Internship Project**
 
-Reproducible Portfolio Analysis | R • Seurat • Linux • MERFISH
+R • Seurat • Linux • MERFISH
 
 
 ## 📌 Project Overview
@@ -245,9 +245,7 @@ The resulting cluster assignments were used throughout the remainder of the anal
 
 Cluster sizes were summarized and saved to:
 
-```text
-results/cluster_summary.csv
-```
+[cluster_summary.csv](results/cluster_summary.csv)
 
 ---
 
@@ -265,9 +263,7 @@ The resulting visualization provides an overview of the 20 transcriptional clust
 
 Output:
 
-```text
-figures/umap_clusters.png
-```
+[umap_clusters.png](figures/umap_clusters.png)
 
 ---
 
@@ -279,12 +275,13 @@ Positive marker genes were examined to determine which genes were enriched withi
 
 The marker analysis produced cluster-level marker tables, including:
 
-```text
-results/marker_genes_all_clusters.csv
-results/top10_markers_per_cluster.csv
-results/top3_markers_per_cluster.csv
-results/cluster_markers.csv
-```
+[cluster_markers.csv](results/cluster_markers.csv)
+
+[marker_genes_all_clusters.csv](results/marker_genes_all_clusters.csv)
+
+[top3_markers_per_cluster.csv](results/top3_markers_per_cluster.csv)
+
+[top10_markers_per_cluster.csv](results/top10_markers_per_cluster.csv)
 
 These tables were subsequently used for visualization and biological interpretation.
 
@@ -302,9 +299,7 @@ The cluster-level marker heatmap displays expression patterns of selected marker
 
 Output:
 
-```text
-figures/marker_heatmap.png
-```
+[marker_heatmap.png](figures/marker_heatmap.png)
 
 ### Average Marker Expression Heatmap
 
@@ -314,9 +309,7 @@ This provides a cleaner cluster-level view of marker enrichment and is useful fo
 
 Output:
 
-```text
-figures/marker_heatmap_average_expression.png
-```
+[marker_heatmap_average_expression.png](figures/marker_heatmap_average_expression.png)
 
 The heatmaps were used as complementary visualization tools rather than as independent clustering methods.
 
@@ -330,17 +323,13 @@ Rather than relying on a native tissue-image object, the project uses the suppli
 
 The spatial coordinates were extracted and saved as:
 
-```text
-results/spatial_coordinates.csv
-```
+[spatial_coordinates.csv](results/spatial_coordinates.csv)
 
 Cluster identities were then combined with the spatial coordinates to visualize where transcriptionally distinct populations occur within the tissue.
 
 Output:
 
-```text
-figures/spatial_clusters.png
-```
+[spatial_clusters.png](figures/spatial_clusters.png)
 
 This provides a spatial interpretation of the transcriptional clusters identified through the Seurat workflow.
 
@@ -354,10 +343,35 @@ The current annotation workflow identifies broad cell-type identities where the 
 
 The resulting annotation files include:
 
-```text
-results/preliminary_cluster_annotations.csv
-results/cluster_annotations_manual.csv
-```
+[preliminary_cluster_annotations.csv](results/preliminary_cluster_annotations.csv)
+[cluster_annotations_manual.csv](results/cluster_annotations_manual.csv)
+
+Cluster Annotations
+
+Cluster	Cell type	Cells: 
+
+0	Excitatory neuron (glutamatergic)	12,258
+1	GABAergic / inhibitory neuron	8,821
+2	Oligodendrocyte-lineage cell	8,545
+3	Excitatory neuron (glutamatergic)	8,219
+4	Astrocyte	7,477
+5	Endothelial cell	6,774
+6	Excitatory neuron (glutamatergic)	5,393
+7	GABAergic / inhibitory neuron	4,452
+8	Oligodendrocyte precursor cell (OPC)	4,139
+9	Striatal-like inhibitory neuron	3,457
+10	Microglia	3,328
+11	Vascular mural cell / pericyte	2,426
+12	Astrocyte	2,236
+13	Vascular smooth muscle cell	1,993
+14	Cholinergic neuron	1,057
+15	Oligodendrocyte-lineage / vascular mixed (provisional)	765
+16	GABAergic / inhibitory neuron (provisional)	735
+17	Excitatory neuron (glutamatergic, provisional)	679
+18	Neuronal subtype (unresolved)	475
+19	Oligodendrocyte-lineage cell (provisional)	178
+
+Full marker evidence per cluster: [cluster_annotations_manual.csv](results/cluster_annotations_manual.csv)
 
 The final annotations include broad populations such as:
 
@@ -406,11 +420,7 @@ The final clustering workflow identified **20 transcriptional clusters**.
 
 The complete machine-readable summary is available in:
 
-```text
-results/cluster_summary.csv
-```
-
----
+[cluster_summary.csv](results/cluster_summary.csv)
 
 # 📁 Repository Structure
 
@@ -420,28 +430,8 @@ NGS-Spatial-Transcriptomics-project/
 ├── data/
 │   └── merfish_mouse_brain/
 │       └── Vizgen_Merfish_count_location.RData
-│
 ├── figures/
-│   ├── marker_heatmap.png
-│   ├── marker_heatmap_average_expression.png
-│   ├── spatial_clusters.png
-│   └── umap_clusters.png
-│
 ├── results/
-│   ├── cluster_annotations_manual.csv
-│   ├── cluster_markers.csv
-│   ├── cluster_summary.csv
-│   ├── curated_heatmap_markers.csv
-│   ├── marker_genes_all_clusters.csv
-│   ├── preliminary_cluster_annotations.csv
-│   ├── qc_summary.csv
-│   ├── sessionInfo.txt
-│   ├── spatial_coordinates.csv
-│   ├── top10_markers_per_cluster.csv
-│   ├── top3_markers_per_cluster.csv
-│   ├── merfish_seurat_processed.rds
-│   └── merfish_seurat_annotated.rds
-│
 ├── .gitignore
 ├── README.md
 ├── Rplots.pdf
@@ -487,7 +477,7 @@ results/
 
 ### Quality control and spatial information
 
-```text
+```
 results/
 ├── qc_summary.csv
 └── spatial_coordinates.csv
@@ -497,39 +487,18 @@ results/
 
 ```text
 results/
-├── sessionInfo.txt
 ├── merfish_seurat_processed.rds
 └── merfish_seurat_annotated.rds
 ```
 
 ---
+# Limitations
 
-# ✔ Implementation Status
-
-```text
-MERFISH Spatial Transcriptomics Workflow
-│
-├── Public dataset ingestion                 ✅ Completed
-├── Seurat object construction               ✅ Completed
-├── Quality control                          ✅ Completed
-├── Expression normalization                 ✅ Completed
-├── Highly variable feature selection        ✅ Completed
-├── PCA                                      ✅ Completed
-├── Nearest-neighbour graph                  ✅ Completed
-├── Graph-based clustering                   ✅ Completed
-├── UMAP visualization                       ✅ Completed
-├── Marker-gene identification               ✅ Completed
-├── Marker heatmap                           ✅ Completed
-├── Average-expression heatmap               ✅ Completed
-├── Spatial coordinate mapping               ✅ Completed
-├── Spatial cluster visualization            ✅ Completed
-├── Cluster-level marker interpretation      ✅ Completed
-├── Manual/provisional annotation            ✅ Completed
-└── Reproducibility documentation            ✅ Completed
-```
+The 483-gene MERFISH panel is targeted, not whole-transcriptome, so some fine-grained subtype calls remain provisional.
+Cluster annotations were assigned by inspecting a curated marker panel rather than exclusively the unrestricted top-ranked DE genes per cluster; both are provided (cluster_annotations_manual.csv vs. top3_markers_per_cluster.csv) for transparency.
+Spatial coordinates are used for visualization only — this workflow does not perform ligand-receptor interaction analysis, spatial autocorrelation, or formal cell-cell communication inference.
 
 ---
-
 # 🔬 Future Extensions
 
 The current project focuses on the core transcriptomic and spatial-clustering workflow.
@@ -550,12 +519,19 @@ These analyses are **not part of the current completed workflow** and are listed
 ---
 
 # 📚 Reproducibility
+```
+R 4.6.1
+Seurat 5.5.1
+SeuratObject 5.4.0
+Matrix 1.7-6
+ggplot2 4.0.3
+patchwork 1.3.2
+Ubuntu 22.04.5 LTS
+```
 
 The complete analysis is documented in:
 
-```text
-Seurat_analysis.R
-```
+[Seurat_analysis.R](Seurat_analysis.R)
 
 The processed Seurat objects and intermediate result tables are provided in the `results/` directory.
 The analysis was performed in a Linux/WSL environment using R and Seurat.
